@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Premium Hub — Digital Shop</title>
+  <meta name="theme-color" content="#0f172a" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eef2ff', 100:'#e0e7ff', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca', 900:'#312e81' },
+            surface: { 800:'#1e293b', 900:'#0f172a', 950:'#020617' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
+</head>
+<body class="bg-surface-950 text-slate-100 min-h-screen">
+  <!-- Top nav -->
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-surface-950/90 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="#/" class="flex items-center gap-2 font-bold text-lg tracking-tight">
+        <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-violet-600 flex items-center justify-center text-sm">PH</span>
+        <span>Premium Hub</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <div id="nav-balance" class="hidden text-sm font-medium text-emerald-400"></div>
+        <button id="btn-login" class="hidden text-sm px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 transition">Login</button>
+        <button id="btn-menu" class="p-2 rounded-lg hover:bg-slate-800" aria-label="Menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Side drawer -->
+  <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-40 hidden"></div>
+  <aside id="drawer" class="fixed top-0 right-0 h-full w-72 bg-surface-900 border-l border-slate-800 z-50 transform translate-x-full transition-transform duration-200 flex flex-col">
+    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+      <span class="font-semibold">Menu</span>
+      <button id="btn-close-drawer" class="p-1 rounded hover:bg-slate-800">✕</button>
+    </div>
+    <nav class="flex-1 p-3 space-y-1 text-sm" id="nav-links">
+      <a href="#/" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800">🏠 Home</a>
+      <a href="#/products" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800">🛍 Products</a>
+      <a href="#/dashboard" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800 auth-only hidden">📊 Dashboard</a>
+      <a href="#/wallet" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800 auth-only hidden">👛 Wallet</a>
+      <a href="#/orders" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800 auth-only hidden">📦 My Orders</a>
+      <a href="#/topup" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800 auth-only hidden">💎 Add Funds</a>
+      <a href="#/admin" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800 admin-only hidden">🛠 Admin</a>
+      <a href="#/support" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-slate-800">🆘 Support</a>
+    </nav>
+    <div class="p-4 border-t border-slate-800" id="drawer-user">
+      <p class="text-xs text-slate-400">Not logged in</p>
+      <button id="btn-logout" class="hidden mt-2 w-full text-sm py-2 rounded-lg border border-slate-700 hover:bg-slate-800">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main id="app" class="max-w-5xl mx-auto px-4 py-6 pb-24"></main>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 shadow-xl text-sm max-w-sm text-center"></div>
+
+  <!-- Login modal: Telegram OR Email -->
+  <div id="login-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 overflow-y-auto">
+    <div class="bg-surface-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl my-8">
+      <h2 class="text-xl font-bold mb-1">Sign in</h2>
+      <p class="text-sm text-slate-400 mb-4">Telegram বা Email — একই wallet & orders</p>
+      <div class="flex gap-2 mb-4 text-sm">
+        <button type="button" id="tab-tg" class="flex-1 py-2 rounded-lg bg-brand-600 font-medium">Telegram</button>
+        <button type="button" id="tab-email" class="flex-1 py-2 rounded-lg border border-slate-700 font-medium">Email</button>
+      </div>
+      <div id="panel-tg">
+        <div id="tg-login-container" class="flex justify-center mb-4"></div>
+        <div class="text-center text-xs text-slate-500 mb-2">Dev only</div>
+        <div class="flex gap-2">
+          <input id="dev-tid" type="text" placeholder="Telegram ID" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500" />
+          <button id="btn-dev-login" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm">Go</button>
+        </div>
+      </div>
+      <div id="panel-email" class="hidden space-y-3">
+        <div class="flex gap-2 text-xs">
+          <button type="button" id="mode-login" class="px-2 py-1 rounded bg-slate-800">Login</button>
+          <button type="button" id="mode-register" class="px-2 py-1 rounded text-slate-400">Register</button>
+          <button type="button" id="mode-forgot" class="px-2 py-1 rounded text-slate-400">Forgot</button>
+        </div>
+        <input id="em-name" type="text" placeholder="Name (register)" class="hidden w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        <input id="em-email" type="email" placeholder="Email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500" />
+        <input id="em-pass" type="password" placeholder="Password (min 6)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500" />
+        <input id="em-token" type="text" placeholder="Reset / verify token" class="hidden w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        <button id="btn-email-auth" class="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 font-medium text-sm">Continue</button>
+      </div>
+      <button id="btn-close-login" class="mt-4 w-full text-sm text-slate-400 hover:text-white">Cancel</button>
+    </div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
