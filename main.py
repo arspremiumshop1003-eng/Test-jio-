@@ -31,7 +31,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from .core.config import (
+from core.config import (
     ADMIN_IDS, BOT_TOKEN, CORS_ORIGINS, DB, PAYMENT_API_KEY, PAYMENT_BASE_URL,
     PAYMENT_WEBHOOK_SECRET, PHEAD, SHOP_NAME, SUPPORT_USERNAME, SUPPORT_URL,
     TELEGRAM_BOT_USERNAME, _PAYMENT_OK, AHEAD, BASE_URL, EHEAD, ELITE_BASE_URL,
@@ -40,17 +40,17 @@ from .core.config import (
     ELITE_MARKUP_PERCENT, ELITE_MARKUP_USDT, SHOPBOT_MARKUP_PERCENT, SHOPBOT_MARKUP_USDT,
     _UPSTREAM_SUPPLIERS, FEATURED_PRODUCT_KEYWORDS, MAIN_PRODUCT_KEYWORDS,
 )
-from .core.db import init_db, db, get_setting, set_setting_value, row_to_dict, backup_database
-from .core.helpers import (
+from core.db import init_db, db, get_setting, set_setting_value, row_to_dict, backup_database
+from core.helpers import (
     money, fmoney, new_ref, public_product_name, is_featured_product,
     is_main_product, product_display_priority,
 )
-from .core.users import (
+from core.users import (
     get_user, ensure_user, get_balance, is_banned, admin_add_balance,
     admin_remove_balance, search_users, list_users, user_stats, get_transactions,
     ban_user, unban_user,
 )
-from .auth.jwt_auth import (
+from auth.jwt_auth import (
     get_current_user, require_admin, login_from_telegram_widget,
     create_access_token, get_optional_user,
 )
@@ -716,7 +716,7 @@ def finish_own_delivery(order_ref: str, quantity: int) -> list:
 # ---------------------------------------------------------------------------
 @app.on_event("startup")
 def on_startup():
-    from .core.db import integrity_check, backup_database
+    from core.db import integrity_check, backup_database
 
     init_db()
     ok, msg = integrity_check()
@@ -738,7 +738,7 @@ def on_startup():
 @app.get("/health")
 @app.get("/api/health")
 def health():
-    from .core.db import integrity_check
+    from core.db import integrity_check
 
     ok, msg = integrity_check()
     return {
@@ -1617,7 +1617,7 @@ def admin_delete_own_product(product_key: str, admin: dict = Depends(require_adm
 
 @app.get("/api/admin/db/integrity")
 def admin_db_integrity(admin: dict = Depends(require_admin)):
-    from .core.db import integrity_check
+    from core.db import integrity_check
 
     ok, msg = integrity_check()
     return {"ok": ok, "message": msg, "db_path": os.path.abspath(DB)}
